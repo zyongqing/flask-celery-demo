@@ -112,3 +112,10 @@ def task_show_status(self, count):
         self.update_state(state='STAGE-%d' % i, meta={'progress': progress})
         time.sleep(2)
     return 'done'
+
+
+# celery -A manage.celery beat  -l debug
+# http://docs.celeryproject.org/en/latest/userguide/periodic-tasks.html
+@celery.task(bind=True)
+def task_cron_job(self):
+    current_app.logger.debug('run cron_job task')

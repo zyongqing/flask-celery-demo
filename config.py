@@ -9,6 +9,12 @@ class Config:
     CELERY_TIMEZONE = 'Asia/Shanghai'
     CELERY_BROKER_URL = 'redis://localhost:6379'
     CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+    CELERYBEAT_SCHEDULE = {
+        'task_cron_job_10_sec': {
+            'task': 'app.blueprints.tasks.views.task_cron_job',
+            'schedule': 10,
+        }
+    }
 
 
 class DevelopmentConfig(Config):
