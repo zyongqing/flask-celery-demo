@@ -40,6 +40,20 @@ def ack_before():
     return 'task submit'
 
 
+@bp.route('/show_status')
+def show_status():
+    current_app.logger.debug('async run show_status task')
+    task = task_show_status.delay(3)
+    current_app.logger.debug('task status: %s' % task.status)
+
+    def on_message(body):
+        current_app.logger.debug('task status: %s, progress: %s' % (
+            body.get('status'), body.get('result')))
+
+    result = task.get(interval=1, on_message=on_message, propagate=False)
+    return 'task %s' % result
+
+
 # default queue is: celery
 # celery -A manage.celery worker -c 1 --loglevel=debug
 @celery.task()
@@ -87,3 +101,14 @@ def task_ack_before():
     current_app.logger.debug('run ack_before task')
     time.sleep(5)
     raise Exception('something wrong')
+
+
+# http://docs.celeryproject.org/en/latest/userguide/tasks.html#task-states
+@celery.task(bind=True)
+def task_show_status(self, count):
+    current_app.logger.debug('run show_status task')
+    for i in range(count)[::-1]:
+        progress = 100 - 100/count * i
+        self.update_state(state='STAGE-%d' % i, meta={'progress': progress})
+        time.sleep(2)
+    return 'done'

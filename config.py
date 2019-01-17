@@ -8,6 +8,7 @@ class Config:
     # CELERY SETTING
     CELERY_TIMEZONE = 'Asia/Shanghai'
     CELERY_BROKER_URL = 'redis://localhost:6379'
+    CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 
 
 class DevelopmentConfig(Config):
