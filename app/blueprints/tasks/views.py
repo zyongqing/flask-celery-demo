@@ -1,5 +1,6 @@
 import time
 from flask import current_app, Blueprint
+from celery.exceptions import SoftTimeLimitExceeded
 from ...extensions import celery
 
 bp = Blueprint('main', __name__)
@@ -52,6 +53,20 @@ def show_status():
 
     result = task.get(interval=1, on_message=on_message, propagate=False)
     return 'task %s' % result
+
+
+@bp.route('/soft_limit')
+def soft_limit():
+    current_app.logger.debug('async run soft_limit task')
+    task_soft_limit.apply_async(soft_time_limit=5)
+    return 'task submit'
+
+
+@bp.route('/hard_limit')
+def hard_limit():
+    current_app.logger.debug('async run hard_limit task')
+    task_hard_limit.apply_async(time_limit=8)
+    return 'task submit'
 
 
 # default queue is: celery
@@ -119,3 +134,19 @@ def task_show_status(self, count):
 @celery.task(bind=True)
 def task_cron_job(self):
     current_app.logger.debug('run cron_job task')
+
+
+@celery.task(bind=True)
+def task_soft_limit(self):
+    current_app.logger.debug('run soft_limit task')
+    try:
+        time.sleep(10)
+    except SoftTimeLimitExceeded:
+        current_app.logger.debug('task reached soft limit time')
+
+
+@celery.task(bind=True)
+def task_hard_limit(self):
+    current_app.logger.debug('run hard_limit task')
+    time.sleep(10)
+    current_app.logger.debug('this line does not show')
