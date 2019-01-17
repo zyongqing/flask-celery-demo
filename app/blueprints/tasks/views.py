@@ -18,6 +18,13 @@ def sub():
     return 'task submit'
 
 
+@bp.route('/mul')
+def mul():
+    current_app.logger.debug('async run mul task')
+    task_mul.delay(456, 123)
+    return 'task submit'
+
+
 # default queue is: celery
 # celery -A manage.celery worker -c 1 --loglevel=debug
 @celery.task()
@@ -32,3 +39,10 @@ def task_add(x, y):
 def task_sub(x, y):
     current_app.logger.debug('run sub task')
     return x - y
+
+
+# bind means task instance itself as first argument
+@celery.task(bind=True)
+def task_mul(self, x, y):
+    current_app.logger.debug('run mul task: %s' % self.request.id)
+    return x * y
