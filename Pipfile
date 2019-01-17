@@ -12,6 +12,7 @@ flask-celery-helper = "*"
 redis = "*"
 flask-socketio = "*"
 eventlet = "*"
+requests = "*"
 
 [requires]
 python_version = "3.6"
