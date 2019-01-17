@@ -1,3 +1,4 @@
+import time
 from flask import current_app, Blueprint
 from ...extensions import celery
 
@@ -25,6 +26,13 @@ def mul():
     return 'task submit'
 
 
+@bp.route('/div')
+def div():
+    current_app.logger.debug('async run div task')
+    task_div.delay(456, 0)
+    return 'task submit'
+
+
 # default queue is: celery
 # celery -A manage.celery worker -c 1 --loglevel=debug
 @celery.task()
@@ -46,3 +54,19 @@ def task_sub(x, y):
 def task_mul(self, x, y):
     current_app.logger.debug('run mul task: %s' % self.request.id)
     return x * y
+
+
+# retry task musts be a bind task
+# when task retry it will send a new message with same task id and arguments
+# http://docs.celeryproject.org/en/latest/userguide/tasks.html#retrying
+@celery.task(bind=True, max_retries=1)
+def task_div(self, x, y):
+    try:
+        current_app.logger.debug('run div task: %s' % self.request.id)
+        return x / y
+    except Exception as e:
+        current_app.logger.warn(e)
+        time.sleep(5)
+        y += 1  # when retried y will not changed, still be 0
+        raise self.retry(exc=e, countdown=60)  # retry as a exception
+        current_app.logger.debug('this line does not show')
