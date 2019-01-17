@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>flask celery demo</title>
+</head>
+<body>
+  <p>SocketIO demo</p>
+</body>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+  var socket = io.connect('http://' + document.domain + ':' + location.port);
+  socket.on('connect', function() {
+      socket.emit('hello', {data: 'I\'m connected!'});
+  });
+
+  socket.on('world', function(message) {
+      console.log(message);
+  });
+</script>
+</html>

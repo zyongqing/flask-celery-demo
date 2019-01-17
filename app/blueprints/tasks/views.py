@@ -3,7 +3,7 @@ from flask import current_app, Blueprint
 from celery.exceptions import SoftTimeLimitExceeded
 from ...extensions import celery
 
-bp = Blueprint('main', __name__)
+bp = Blueprint('tasks', __name__)
 
 
 @bp.route('/add')

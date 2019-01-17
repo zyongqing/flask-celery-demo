@@ -1,7 +1,7 @@
 import coloredlogs
 from flask import Flask
 from config import config
-from .extensions import celery
+from .extensions import celery, socketio
 
 
 def _init_logging(app):
@@ -29,11 +29,15 @@ def _init_errors(app):
 
 def _init_extensions(app):
     celery.init_app(app)
+    socketio.init_app(app)
 
 
 def _register_blueprints(app):
     from .blueprints.tasks.views import bp
     app.register_blueprint(bp, url_prefix='/tasks')
+
+    from .blueprints.sockets.views import bp
+    app.register_blueprint(bp, url_prefix='/sockets')
 
 
 def create_app(config_name):
