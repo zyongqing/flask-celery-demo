@@ -33,6 +33,13 @@ def div():
     return 'task submit'
 
 
+@bp.route('/ack_before')
+def ack_before():
+    current_app.logger.debug('async run ack_before task')
+    task_ack_before.delay()
+    return 'task submit'
+
+
 # default queue is: celery
 # celery -A manage.celery worker -c 1 --loglevel=debug
 @celery.task()
@@ -70,3 +77,13 @@ def task_div(self, x, y):
         y += 1  # when retried y will not changed, still be 0
         raise self.retry(exc=e, countdown=60)  # retry as a exception
         current_app.logger.debug('this line does not show')
+
+
+# in default, task ack message before it is executed
+# when any exception raise, it was gone and never process again
+# if task is idempotent you can set option: acks_late
+@celery.task
+def task_ack_before():
+    current_app.logger.debug('run ack_before task')
+    time.sleep(5)
+    raise Exception('something wrong')
