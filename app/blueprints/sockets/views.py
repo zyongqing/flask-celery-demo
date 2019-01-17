@@ -10,6 +10,12 @@ def index():
     return render_template('socketio.html')
 
 
+@bp.route('/send')
+def send():
+    socketio.emit('world', 'new world')
+    return 'message sent'
+
+
 @socketio.on('hello')
 def handle_hello_message(message):
     current_app.logger.debug('received hello message: %s' % message)
